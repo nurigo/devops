@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: applicationset
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - appname: kube-prometheus-stack
+        namespace: monitoring
+      - appname: metrics-server
+        namespace: kube-system
+      - appname: demo-app
+        namespace: demo-nginx
+  template:
+    metadata:
+      name: '{{appname}}-dev'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/nurigo/demo_helm.git
+        targetRevision: HEAD
+        path: '{{appname}}'
+        helm:
+          valueFiles:
+          - values.yaml
+          - ci/values.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
