@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: istio-cni
+  name: istiod
   namespace: argocd
 spec:
   generators:
@@ -9,7 +9,7 @@ spec:
       repoURL: https://github.com/nurigo/devops.git
       revision: main
       files:
-      - path: argocd/addons/envs/dev/nurigo-istio-cni.yaml
+      - path: argocd/addons/envs/dev/nurigo-istio-daemon.yaml
 
   template:
     metadata:
@@ -33,3 +33,4 @@ spec:
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
+        # - ServerSideApply=true

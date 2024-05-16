@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: istio-gateway
+  name: istio-ingress
   namespace: argocd
 spec:
   generators:
@@ -9,7 +9,7 @@ spec:
       repoURL: https://github.com/nurigo/devops.git
       revision: main
       files:
-      - path: argocd/addons/envs/dev/nurigo-istio-gateway.yaml
+      - path: argocd/addons/envs/dev/nurigo-istio-ingress.yaml
 
   template:
     metadata:
@@ -33,4 +33,4 @@ spec:
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
-        - ServerSideApply=true
+        # - ServerSideApply=true
