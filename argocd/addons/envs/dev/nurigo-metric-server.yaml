@@ -1,0 +1,2 @@
+app_name: metric-server
+namespace: kube-system

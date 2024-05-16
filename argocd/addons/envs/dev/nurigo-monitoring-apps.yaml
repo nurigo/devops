@@ -1,0 +1,2 @@
+app_name: kube-prometheus-stack
+namespace: monitoring

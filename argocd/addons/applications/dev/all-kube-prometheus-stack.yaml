@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/nurigo/devops.git
+      revision: main
+      files:
+      - path: argocd/addons/envs/dev/*.yaml
+
+  template:
+    metadata:
+      name: '{{ app_name }}-dev'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/nurigo/devops.git
+        targetRevision: HEAD
+        path: 'helm-chart/{{ app_name }}'
+        helm:
+          valueFiles:
+          - values.yaml
+          - ci/values.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
