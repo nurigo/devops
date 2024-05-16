@@ -9,7 +9,7 @@ spec:
       repoURL: https://github.com/nurigo/devops.git
       revision: main
       files:
-      - path: argocd/addons/envs/dev/*.yaml
+      - path: argocd/addons/envs/dev/*-metric-*.yaml
 
   template:
     metadata:
