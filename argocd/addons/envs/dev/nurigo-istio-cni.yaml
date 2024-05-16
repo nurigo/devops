@@ -1,2 +1,2 @@
 app_name: cni
-namespace: istio-system
+namespace: kube-system
