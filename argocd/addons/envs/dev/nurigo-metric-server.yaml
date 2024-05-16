@@ -1,2 +1,2 @@
-app_name: metric-server
+app_name: metrics-server
 namespace: kube-system
