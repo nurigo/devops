@@ -1,0 +1,114 @@
+defaultRules:
+  create: true
+  rules:
+    etcd: false
+    kubeApiserverAvailability: false
+    kubeApiserverBurnrate: false
+    kubeApiserverHistogram: false
+    kubeApiserverSlos: false
+    kubeControllerManager: false
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+    windows: false
+
+## Configuration for alertmanager
+alertmanager:
+  enabled: false
+
+grafana:
+  enabled: true
+  defaultDashboardsTimezone: Asia/Seoul
+  deploymentStrategy:
+    type: Recreate
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing # internet-facing or internal
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/group.name: sg-external
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+      alb.ingress.kubernetes.io/success-codes: 200-302
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:973531348166:certificate/d97fb2e6-2fdf-44d0-ad31-77b9d0c76df5"
+      external-dns.alpha.kubernetes.io/hostname: "grafana.solapi.net"
+    hosts:
+    - grafana.solapi.net
+    paths:
+    - /*
+  persistence:
+    type: pvc
+    storageClassName: gp2
+    enabled: true
+    accessModes:
+    - ReadWriteOnce
+    size: 5Gi
+    finalizers:
+    - kubernetes.io/pvc-protection
+
+  # Provision grafana-dashboards-kubernetes
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'grafana-dashboards-kubernetes'
+        orgId: 1
+        folder: 'Kubernetes'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/grafana-dashboards-kubernetes
+
+  dashboards:
+    grafana-dashboards-kubernetes:
+      k8s-views-global:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+        token: ''
+      k8s-views-namespaces:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+        token: ''
+      k8s-views-nodes:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+        token: ''
+      k8s-views-pods:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+        token: ''
+
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: true
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: true
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: true
+kubeStateMetrics:
+  enabled: true
+nodeExporter:
+  enabled: true
+prometheusOperator:
+  enabled: true
+
+# prometheus-node-exporter:
+#   priorityClassName: system-node-critical
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    retention: 5d
+    retentionSize: 10GiB
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
