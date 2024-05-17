@@ -22,8 +22,15 @@ spec:
         targetRevision: HEAD
         path: 'helm-chart/istio/{{ app_name }}'
         helm:
+          # values: |-
+          #   defaults:
+          #     meshConfig
+          #       ingressSelector: istio-ingress
+          #       ingressService: istio-ingress
+          #     pilot:
+          #       env: K8S_INGRESS_NS=istio-ingress
           valueFiles:
-          - values.yaml
+          - "values.yaml"
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ namespace }}'
@@ -33,4 +40,3 @@ spec:
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
-        # - ServerSideApply=true

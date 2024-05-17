@@ -22,8 +22,8 @@ spec:
         targetRevision: HEAD
         path: 'helm-chart/istio/{{ app_name }}'
         helm:
-          valueFiles:
-          - values.yaml
+          values: |-
+            defaultRevision: "default"
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ namespace }}'
@@ -33,4 +33,4 @@ spec:
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
-        - ServerSideApply=true
+

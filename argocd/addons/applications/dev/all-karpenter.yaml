@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: karpenter
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/nurigo/devops.git
+      revision: main
+      files:
+      - path: argocd/addons/envs/dev/*.yaml
+
+  template:
+    metadata:
+      name: '{{ app_name }}-dev'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/nurigo/devops.git
+        targetRevision: HEAD
+        path: 'helm-chart/{{ app_name }}'
+        helm:
+          values: |-
+            serviceAccount:
+              annotations:
+                eks.amazonaws.com/role-arn: arn:aws:iam::973531348166:role/KarpenterControllerRole-apple-testbed-eksCluster
+            settings:
+              clusterName: apple-testbed-eksCluster
+
+            controller:
+              resources:
+                limits:
+                  memory: 1Gi
+                requests:
+                  cpu: 100m
+                  memory: 1Gi
+
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: karpenter.sh/nodepool
+                      operator: DoesNotExist
+                  - matchExpressions:
+                    - key: eks.amazonaws.com/nodegroup
+                      operator: In
+                      values:
+                      - nurigo-testbed-node-2024051000362872030000000e
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - topologyKey: "kubernetes.io/hostname"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
